@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campaign Brief Generator — Priyanka Rajpali</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --teal-dark:#0A1F1C;--teal-mid:#0FA87E;--teal-light:#E6F7F2;
+  --navy:#0F1729;--off-white:#F7F5F2;--gray:#5A6478;
+  --gray-light:#8A96A8;--white:#FFFFFF;--border:rgba(15,168,126,0.18);
+  --shadow:0 2px 16px rgba(0,0,0,0.05);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Sora',sans-serif;background:var(--off-white);color:var(--navy);line-height:1.6;min-height:100vh;-webkit-text-size-adjust:100%}
+
+/* HERO */
+.hero{background:var(--teal-dark);padding:40px 20px 36px;text-align:center;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 50% 0%,rgba(15,168,126,0.16) 0%,transparent 70%);pointer-events:none}
+.hero-badge{display:inline-block;background:rgba(15,168,126,0.12);border:1px solid var(--border);color:var(--teal-mid);font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:16px}
+.hero h1{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(24px,6vw,44px);font-weight:700;color:var(--white);line-height:1.15;margin-bottom:10px}
+.hero h1 span{color:var(--teal-mid)}
+.hero p{font-size:13px;color:rgba(255,255,255,0.5);max-width:420px;margin:0 auto;font-weight:300}
+
+/* LAYOUT */
+.main{max-width:680px;margin:0 auto;padding:24px 16px 60px}
+
+/* CARD */
+.card{background:var(--white);border-radius:16px;padding:24px 20px;margin-bottom:16px;border:1px solid rgba(0,0,0,0.05);box-shadow:var(--shadow)}
+.card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal-mid);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-title::after{content:'';flex:1;height:1px;background:var(--teal-light)}
+
+/* FORM */
+.form-stack{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--gray);letter-spacing:0.05em;text-transform:uppercase}
+.field-hint{font-size:11px;color:var(--gray-light);margin-top:2px}
+.field input,.field select,.field textarea{font-family:'Sora',sans-serif;font-size:15px;color:var(--navy);background:var(--off-white);border:1.5px solid transparent;border-radius:10px;padding:12px 14px;outline:none;transition:border-color .2s,background .2s;width:100%;-webkit-appearance:none;appearance:none}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A6478' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.field textarea{resize:vertical;min-height:80px;line-height:1.55}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--teal-mid);background:var(--white)}
+.field input::placeholder,.field textarea::placeholder{color:var(--gray-light)}
+
+/* TWO COL ON TABLET+ */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:520px){.form-row{grid-template-columns:1fr}}
+
+/* ADVANCED TOGGLE */
+.advanced-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;padding:12px 0;border:none;background:none;width:100%;text-align:left}
+.advanced-toggle-label{font-size:13px;font-weight:600;color:var(--teal-mid)}
+.advanced-toggle-hint{font-size:12px;color:var(--gray-light);flex:1}
+.advanced-toggle-icon{font-size:16px;color:var(--teal-mid);transition:transform .25s;margin-left:auto}
+.advanced-toggle.open .advanced-toggle-icon{transform:rotate(180deg)}
+.advanced-section{display:none;padding-top:4px}
+.advanced-section.open{display:flex;flex-direction:column;gap:14px}
+.advanced-divider{height:1px;background:var(--teal-light);margin:4px 0}
+
+/* FILE UPLOAD */
+.upload-zone{border:1.5px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;position:relative;background:var(--off-white)}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--teal-mid);background:var(--teal-light)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{font-size:24px;margin-bottom:6px}
+.upload-label{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px}
+.upload-hint{font-size:11px;color:var(--gray-light)}
+.upload-status{font-size:12px;color:var(--teal-mid);font-weight:600;margin-top:6px;min-height:18px}
+.upload-preview{margin-top:10px;border-radius:8px;overflow:hidden;max-height:120px;display:none}
+.upload-preview img{width:100%;object-fit:cover;max-height:120px}
+
+/* GENERATE BTN */
+.generate-btn{width:100%;padding:16px;background:var(--teal-mid);color:var(--white);font-family:'Bricolage Grotesque',sans-serif;font-size:16px;font-weight:600;border:none;border-radius:12px;cursor:pointer;transition:opacity .2s,transform .1s;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.generate-btn:active{transform:scale(0.98)}
+.generate-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+/* LOADING */
+.loading{display:none;text-align:center;padding:48px 20px}
+.loading.visible{display:block}
+.spinner{width:36px;height:36px;border:3px solid var(--teal-light);border-top-color:var(--teal-mid);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:14px;color:var(--gray);font-weight:500;margin-bottom:8px}
+.loading-sub{font-size:12px;color:var(--gray-light)}
+
+/* ERROR */
+.error-msg{display:none;background:#FFF0F0;border:1px solid rgba(224,85,85,0.25);border-radius:10px;padding:12px 14px;font-size:13px;color:#C0392B;margin-top:10px;line-height:1.5}
+.error-msg.visible{display:block}
+
+/* OUTPUT */
+.output{display:none}
+.output.visible{display:block}
+
+/* HOOK BANNER */
+.hook-banner{background:var(--teal-dark);border-radius:16px;padding:24px 20px;margin-bottom:16px;position:relative;overflow:hidden}
+.hook-banner::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 0% 50%,rgba(15,168,126,0.2) 0%,transparent 70%);pointer-events:none}
+.hook-label{font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--teal-mid);margin-bottom:10px;position:relative}
+.hook-text{font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(17px,4vw,22px);font-weight:600;color:var(--white);line-height:1.35;position:relative}
+
+/* SEC LABEL */
+.sec-label{font-family:'Bricolage Grotesque',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:var(--teal-mid);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--teal-light)}
+
+/* AUDIENCE */
+.audience-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:420px){.audience-grid{grid-template-columns:1fr}}
+.aud-item{background:var(--off-white);border-radius:10px;padding:12px 14px}
+.aud-item-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-light);margin-bottom:4px}
+.aud-item-val{font-size:13px;color:var(--navy);line-height:1.55}
+
+/* CHANNELS */
+.channels-list{display:flex;flex-direction:column;gap:10px}
+.channel-card{background:var(--off-white);border-radius:12px;padding:14px 16px}
+.channel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px;flex-wrap:wrap}
+.channel-name{font-family:'Bricolage Grotesque',sans-serif;font-size:15px;font-weight:600;color:var(--navy)}
+.channel-right{display:flex;align-items:center;gap:8px}
+.channel-pct{background:var(--teal-mid);color:var(--white);font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.channel-role{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal-mid);background:var(--teal-light);padding:3px 9px;border-radius:20px}
+.channel-why{font-size:13px;color:var(--gray);line-height:1.5}
+
+/* COPY */
+.copy-section{margin-bottom:16px}
+.copy-type-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--gray-light);margin-bottom:8px}
+.copy-item{background:var(--off-white);border-radius:8px;padding:12px 14px;margin-bottom:8px;font-size:13px;color:var(--navy);line-height:1.55;border-left:3px solid var(--teal-mid)}
+.copy-item:last-child{margin-bottom:0}
+
+/* CREATIVE */
+.creative-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:440px){.creative-grid{grid-template-columns:1fr}}
+.creative-item{background:var(--off-white);border-radius:10px;padding:12px 14px}
+.creative-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:5px}
+.creative-label.neutral{color:var(--gray)}
+.creative-label.do{color:#1A8A4A}
+.creative-label.dont{color:#C0392B}
+.creative-val{font-size:13px;color:var(--navy);line-height:1.55}
+.creative-full{grid-column:1/-1}
+
+/* KPIs */
+.kpi-list{display:flex;flex-direction:column;gap:8px}
+.kpi-item{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;background:var(--off-white);border-radius:10px;padding:12px 14px}
+.kpi-left{flex:1}
+.kpi-metric{font-size:13px;font-weight:600;color:var(--navy);margin-bottom:2px}
+.kpi-target{font-size:13px;color:var(--teal-mid);font-weight:600}
+.kpi-tag{font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap;flex-shrink:0;align-self:center}
+.kpi-tag.primary{background:rgba(15,168,126,0.12);color:var(--teal-mid)}
+.kpi-tag.secondary{background:rgba(90,100,120,0.1);color:var(--gray)}
+
+/* SUMMARY */
+.summary-box{background:var(--teal-dark);border-radius:16px;padding:24px 20px;position:relative;overflow:hidden}
+.summary-box::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 80% at 100% 100%,rgba(15,168,126,0.15) 0%,transparent 70%);pointer-events:none}
+.summary-box .hook-label{margin-bottom:10px}
+.summary-box p{font-size:14px;color:rgba(255,255,255,0.75);line-height:1.8;font-weight:300;position:relative}
+
+/* ACTIONS */
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.action-btn{padding:14px;border-radius:12px;font-family:'Sora',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;border:none;text-align:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.action-btn.primary{background:var(--teal-mid);color:var(--white)}
+.action-btn.secondary{background:var(--teal-light);color:var(--teal-dark);border:1px solid var(--border)}
+.action-btn:active{opacity:.8}
+
+/* RESTRICTIONS BADGE */
+.restriction-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(192,57,43,0.08);border:1px solid rgba(192,57,43,0.2);border-radius:8px;padding:6px 10px;font-size:12px;color:#C0392B;font-weight:500;margin-top:8px}
+
+/* FOOTER */
+.footer{background:var(--teal-dark);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-brand{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.5)}
+.footer-brand span{color:var(--teal-mid)}
+.footer-stats{display:flex;gap:20px}
+.footer-stat-val{font-family:'Bricolage Grotesque',sans-serif;font-size:13px;font-weight:700;color:var(--teal-mid)}
+.footer-stat-label{font-size:10px;color:rgba(255,255,255,0.3);margin-left:4px}
+.footer-link{font-size:11px;color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s}
+.footer-link:hover{color:var(--teal-mid)}
+@media(max-width:480px){.footer{flex-direction:column;text-align:center}.footer-stats{justify-content:center}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-badge">Free Growth Marketing Tool</div>
+  <h1>Generate a <span>campaign brief</span><br>in 60 seconds</h1>
+  <p>Six inputs. A full structured brief — hook, channels, copy, KPIs, creative direction — powered by AI.</p>
+</header>
+
+<main class="main">
+
+  <!-- INPUT CARD -->
+  <div class="card" id="inputCard">
+    <div class="card-title">Campaign Inputs</div>
+    <div class="form-stack">
+
+      <div class="field">
+        <label>Product or Brand</label>
+        <input type="text" id="product" placeholder="e.g. Ziina payments app, MPOWER Education Loans" autocomplete="off"/>
+      </div>
+
+      <div class="form-row">
+        <div class="field">
+          <label>Campaign Objective</label>
+          <select id="objective">
+            <option value="">Select objective</option>
+            <option>Brand Awareness</option>
+            <option>Lead Generation</option>
+            <option>App Downloads</option>
+            <option>Sales / Conversions</option>
+            <option>Retention / Re-engagement</option>
+            <option>Community Growth</option>
+            <option>Product Launch</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Budget Range</label>
+          <select id="budget">
+            <option value="">Select range</option>
+            <option>Under $5,000</option>
+            <option>$5,000 – $20,000</option>
+            <option>$20,000 – $50,000</option>
+            <option>$50,000 – $100,000</option>
+            <option>$100,000 – $500,000</option>
+            <option>$500,000+</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Market / Geography</label>
+        <input type="text" id="market" placeholder="e.g. UAE, Singapore, India — Tier 1 cities" autocomplete="off"/>
+      </div>
+
+      <div class="field">
+        <label>Target Audience</label>
+        <textarea id="audience" placeholder="e.g. Indian students aged 18–28 planning to study abroad, first-time digital payment users in UAE"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Key Message or Insight</label>
+        <input type="text" id="message" placeholder="e.g. Education shouldn't have borders. Fast, trusted payments." autocomplete="off"/>
+      </div>
+
+      <!-- ADVANCED CONTEXT TOGGLE -->
+      <div class="advanced-divider"></div>
+
+      <button class="advanced-toggle" id="advancedToggle" onclick="toggleAdvanced()" type="button">
+        <span class="advanced-toggle-label">Advanced Context</span>
+        <span class="advanced-toggle-hint">brand guidelines, restrictions, competitors</span>
+        <span class="advanced-toggle-icon">⌄</span>
+      </button>
+
+      <div class="advanced-section" id="advancedSection">
+
+        <!-- INDUSTRY RESTRICTIONS -->
+        <div class="field">
+          <label>Industry Restrictions</label>
+          <select id="restrictions">
+            <option value="">None — no restrictions</option>
+            <option value="finance">Finance / Fintech — no guaranteed returns, FCA/regulatory compliant</option>
+            <option value="healthcare">Healthcare — no medical claims, disclaimer required</option>
+            <option value="alcohol">Alcohol — no targeting under 25, responsible messaging</option>
+            <option value="gambling">Gambling — strict age gating, responsible gambling copy</option>
+            <option value="crypto">Crypto — high risk warnings, no price predictions</option>
+            <option value="education">Education — no misleading outcome claims</option>
+            <option value="custom">Custom — I'll describe below</option>
+          </select>
+          <span class="field-hint">Claude will apply the appropriate copy and creative restrictions automatically</span>
+        </div>
+
+        <!-- BRAND GUIDELINES TEXT -->
+        <div class="field">
+          <label>Brand Guidelines</label>
+          <textarea id="brandGuidelines" placeholder="Paste your brand guidelines here — tone of voice, colour palette, typography, do's and don'ts, key messaging. e.g. We speak like a trusted friend, not a bank. Colours: teal #0FA87E and navy #0F1729. Never use exclamation marks." style="min-height:100px"></textarea>
+        </div>
+
+        <!-- BRAND ASSET UPLOAD -->
+        <div class="field">
+          <label>Upload Brand Asset (optional)</label>
+          <div class="upload-zone" id="imageZone">
+            <input type="file" id="brandImageInput" accept="image/*" onchange="handleImageUpload(event)"/>
+            <div class="upload-icon">🎨</div>
+            <div class="upload-label">Logo or visual reference</div>
+            <div class="upload-hint">JPG, PNG, WebP — Claude reads your visual style</div>
+            <div class="upload-status" id="imageStatus"></div>
+          </div>
+          <div class="upload-preview" id="imagePreview"><img id="previewImg" src="" alt="Brand preview"/></div>
+        </div>
+
+        <!-- BRAND PDF UPLOAD -->
+        <div class="field">
+          <label>Upload Brand Brief or Deck (optional)</label>
+          <div class="upload-zone" id="pdfZone">
+            <input type="file" id="brandPdfInput" accept=".pdf" onchange="handlePdfUpload(event)"/>
+            <div class="upload-icon">📄</div>
+            <div class="upload-label">Brand deck or brief (PDF)</div>
+            <div class="upload-hint">Claude extracts and applies the content automatically</div>
+            <div class="upload-status" id="pdfStatus"></div>
+          </div>
+        </div>
+
+        <!-- COMPETITOR CONTEXT -->
+        <div class="field">
+          <label>Competitor Context</label>
+          <textarea id="competitors" placeholder="Who are you differentiating from? e.g. We compete with Tabby and Tamara in BNPL. They focus on fashion — we focus on everyday essentials. Avoid positioning that mirrors their 'buy now pay later' language."></textarea>
+        </div>
+
+        <!-- ADDITIONAL NOTES -->
+        <div class="field">
+          <label>Additional Notes</label>
+          <textarea id="notes" placeholder="Anything else Claude should know — campaign history, things that didn't work before, specific format requirements, platform focus etc."></textarea>
+        </div>
+
+      </div>
+      <!-- END ADVANCED -->
+
+    </div>
+
+    <button class="generate-btn" id="generateBtn" onclick="generateBrief()" style="margin-top:16px">
+      Generate Campaign Brief →
+    </button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="card loading" id="loadingCard">
+    <div class="spinner"></div>
+    <div class="loading-text">Building your brief</div>
+    <div class="loading-sub">Usually 15–20 seconds</div>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output" id="outputCard">
+
+    <div class="hook-banner">
+      <div class="hook-label">Campaign Hook</div>
+      <div class="hook-text" id="hookText"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Target Audience</div>
+      <div class="audience-grid" id="audienceGrid"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Channel Strategy</div>
+      <div class="channels-list" id="channelsList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Ad Copy Variants</div>
+      <div class="copy-section">
+        <div class="copy-type-label">Headlines</div>
+        <div id="headlinesList"></div>
+      </div>
+      <div class="copy-section">
+        <div class="copy-type-label">Body Copy</div>
+        <div id="bodyList"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Creative Direction</div>
+      <div class="creative-grid" id="creativeGrid"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">KPIs & Success Metrics</div>
+      <div class="kpi-list" id="kpiList"></div>
+    </div>
+
+    <div class="summary-box" id="summaryBox"></div>
+
+    <div class="actions">
+      <button class="action-btn primary" onclick="copyBrief()">Copy brief</button>
+      <button class="action-btn secondary" onclick="resetForm()">Start over</button>
+    </div>
+
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-brand">Built by <span>Priyanka Rajpali</span></div>
+  <div class="footer-stats">
+    <span><span class="footer-stat-val">$14M</span><span class="footer-stat-label">Pipeline</span></span>
+    <span><span class="footer-stat-val">$2.30</span><span class="footer-stat-label">CAC</span></span>
+    <span><span class="footer-stat-val">$10M+</span><span class="footer-stat-label">Managed</span></span>
+  </div>
+  <a href="https://priyankarajpali2698.github.io/Portfolio" target="_blank" class="footer-link">Portfolio →</a>
+</footer>
+
+<script>
+// PDF.js worker
+if(typeof pdfjsLib !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+let rawBriefText = '';
+let brandImageB64 = null;
+let brandImageType = null;
+let extractedPdfText = '';
+
+// ── ADVANCED TOGGLE ──────────────────────────────────────────────────────────
+function toggleAdvanced() {
+  const btn = document.getElementById('advancedToggle');
+  const sec = document.getElementById('advancedSection');
+  btn.classList.toggle('open');
+  sec.classList.toggle('open');
+}
+
+// ── IMAGE UPLOAD ─────────────────────────────────────────────────────────────
+function handleImageUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('imageStatus');
+  status.textContent = 'Reading image...';
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const result = ev.target.result;
+    const parts = result.split(',');
+    brandImageB64 = parts[1];
+    brandImageType = file.type;
+    const preview = document.getElementById('imagePreview');
+    const img = document.getElementById('previewImg');
+    img.src = result;
+    preview.style.display = 'block';
+    status.textContent = `✓ ${file.name} loaded`;
+  };
+  reader.onerror = () => { status.textContent = 'Failed to read image.'; };
+  reader.readAsDataURL(file);
+}
+
+// ── PDF UPLOAD ────────────────────────────────────────────────────────────────
+async function handlePdfUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('pdfStatus');
+  status.textContent = 'Extracting text from PDF...';
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    let fullText = '';
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      fullText += content.items.map(item => item.str).join(' ') + '\n';
+    }
+    extractedPdfText = fullText.trim();
+    status.textContent = `✓ ${file.name} — ${pdf.numPages} page${pdf.numPages > 1 ? 's' : ''} extracted`;
+  } catch(err) {
+    status.textContent = 'Could not extract PDF text. Try pasting guidelines instead.';
+    extractedPdfText = '';
+  }
+}
+
+// ── GENERATE ─────────────────────────────────────────────────────────────────
+async function generateBrief() {
+  const product      = document.getElementById('product').value.trim();
+  const objective    = document.getElementById('objective').value;
+  const market       = document.getElementById('market').value.trim();
+  const audience     = document.getElementById('audience').value.trim();
+  const budget       = document.getElementById('budget').value;
+  const message      = document.getElementById('message').value.trim();
+  const restrictions = document.getElementById('restrictions').value;
+  const guidelines   = document.getElementById('brandGuidelines').value.trim();
+  const competitors  = document.getElementById('competitors').value.trim();
+  const notes        = document.getElementById('notes').value.trim();
+  const errorEl      = document.getElementById('errorMsg');
+  errorEl.classList.remove('visible');
+
+  if (!product||!objective||!market||!audience||!budget||!message) {
+    errorEl.textContent = 'Please fill in all six required fields before generating.';
+    errorEl.classList.add('visible');
+    return;
+  }
+
+  document.getElementById('inputCard').style.display = 'none';
+  document.getElementById('loadingCard').classList.add('visible');
+  document.getElementById('outputCard').classList.remove('visible');
+  document.getElementById('generateBtn').disabled = true;
+
+  // Build context string
+  let contextBlock = '';
+  if (restrictions) contextBlock += `\nINDUSTRY RESTRICTIONS: ${restrictions} — apply all relevant regulatory and platform-level copy restrictions for this industry.`;
+  if (guidelines) contextBlock += `\nBRAND GUIDELINES:\n${guidelines}`;
+  if (extractedPdfText) contextBlock += `\nBRAND DECK / BRIEF (extracted from PDF):\n${extractedPdfText.slice(0, 3000)}`;
+  if (competitors) contextBlock += `\nCOMPETITOR CONTEXT:\n${competitors}`;
+  if (notes) contextBlock += `\nADDITIONAL NOTES:\n${notes}`;
+
+  const textPrompt = `You are a senior growth marketing strategist. Generate a complete campaign brief and return ONLY a raw JSON object — no markdown, no explanation, no backticks.
+
+REQUIRED INPUTS:
+PRODUCT: ${product}
+OBJECTIVE: ${objective}
+MARKET: ${market}
+AUDIENCE: ${audience}
+BUDGET: ${budget}
+KEY MESSAGE: ${message}
+${contextBlock || ''}
+${brandImageB64 ? 'A brand image has been provided. Analyse its visual style — colours, mood, typography feel, and imagery tone — and reference this in your creative direction.' : ''}
+
+Return this exact JSON structure — be specific, opinionated, and practical:
+{
+  "hook": "Single punchy campaign hook sentence that drives everything",
+  "audience": {
+    "demographics": "Age, location, gender, income level",
+    "psychographics": "Values, mindset, lifestyle",
+    "behaviours": "How they discover, research and decide",
+    "tension": "The core desire or problem the campaign addresses"
+  },
+  "channels": [
+    {"name": "Channel name", "budget_pct": "X%", "role": "Awareness|Consideration|Conversion|Retention", "why": "One specific reason this channel fits this brief"},
+    {"name": "Channel name", "budget_pct": "X%", "role": "Conversion", "why": "One specific reason"},
+    {"name": "Channel name", "budget_pct": "X%", "role": "Awareness", "why": "One specific reason"},
+    {"name": "Channel name", "budget_pct": "X%", "role": "Retention", "why": "One specific reason"}
+  ],
+  "copy": {
+    "headlines": ["Headline 1 — max 8 words", "Headline 2 — max 8 words", "Headline 3 — max 8 words"],
+    "body": ["Body copy 1 — max 30 words. Reflect any brand guidelines and restrictions.", "Body copy 2 — max 30 words", "Body copy 3 — max 30 words"]
+  },
+  "creative": {
+    "tone": "Visual tone in 2–3 sentences",
+    "imagery": "Specific imagery style and subject matter",
+    "do": "One key creative do — specific and actionable",
+    "dont": "One key creative dont — specific and actionable",
+    "reference": "One specific creative reference, analogy or comparison brand"
+  },
+  "kpis": [
+    {"metric": "Primary metric name", "target": "Realistic benchmark target", "type": "primary"},
+    {"metric": "Primary metric name", "target": "Realistic benchmark target", "type": "primary"},
+    {"metric": "Primary metric name", "target": "Realistic benchmark target", "type": "primary"},
+    {"metric": "Secondary metric name", "target": "Realistic benchmark target", "type": "secondary"},
+    {"metric": "Secondary metric name", "target": "Realistic benchmark target", "type": "secondary"},
+    {"metric": "Secondary metric name", "target": "Realistic benchmark target", "type": "secondary"}
+  ],
+  "summary": "Four to five sentence executive summary. Include any restrictions applied if relevant."
+}`;
+
+  // Build message content — include image if uploaded
+  const messageContent = brandImageB64
+    ? [
+        { type: 'image', source: { type: 'base64', media_type: brandImageType, data: brandImageB64 } },
+        { type: 'text', text: textPrompt }
+      ]
+    : textPrompt;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2000,
+        messages: [{ role: 'user', content: messageContent }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const text = data.content?.[0]?.text || '';
+    rawBriefText = text;
+    const clean = text.replace(/```json|```/g,'').trim();
+    const brief = JSON.parse(clean);
+    renderBrief(brief);
+
+    document.getElementById('loadingCard').classList.remove('visible');
+    document.getElementById('outputCard').classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  } catch(err) {
+    document.getElementById('loadingCard').classList.remove('visible');
+    document.getElementById('inputCard').style.display = 'block';
+    document.getElementById('generateBtn').disabled = false;
+    errorEl.textContent = 'Something went wrong generating the brief. Please try again.';
+    errorEl.classList.add('visible');
+  }
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function renderBrief(b) {
+  document.getElementById('hookText').textContent = b.hook || '';
+
+  const ag = document.getElementById('audienceGrid');
+  ag.innerHTML = [
+    ['Demographics', b.audience?.demographics],
+    ['Psychographics', b.audience?.psychographics],
+    ['Behaviours', b.audience?.behaviours],
+    ['Core Tension', b.audience?.tension],
+  ].map(([l,v]) => `
+    <div class="aud-item">
+      <div class="aud-item-label">${l}</div>
+      <div class="aud-item-val">${v||''}</div>
+    </div>`).join('');
+
+  document.getElementById('channelsList').innerHTML = (b.channels||[]).map(ch => `
+    <div class="channel-card">
+      <div class="channel-header">
+        <div class="channel-name">${ch.name}</div>
+        <div class="channel-right">
+          <div class="channel-role">${ch.role}</div>
+          <div class="channel-pct">${ch.budget_pct}</div>
+        </div>
+      </div>
+      <div class="channel-why">${ch.why}</div>
+    </div>`).join('');
+
+  document.getElementById('headlinesList').innerHTML = (b.copy?.headlines||[]).map(h =>
+    `<div class="copy-item">${h}</div>`).join('');
+  document.getElementById('bodyList').innerHTML = (b.copy?.body||[]).map(bd =>
+    `<div class="copy-item">${bd}</div>`).join('');
+
+  document.getElementById('creativeGrid').innerHTML = `
+    <div class="creative-item">
+      <div class="creative-label neutral">Visual Tone</div>
+      <div class="creative-val">${b.creative?.tone||''}</div>
+    </div>
+    <div class="creative-item">
+      <div class="creative-label neutral">Imagery Style</div>
+      <div class="creative-val">${b.creative?.imagery||''}</div>
+    </div>
+    <div class="creative-item">
+      <div class="creative-label do">✓ Do</div>
+      <div class="creative-val">${b.creative?.do||''}</div>
+    </div>
+    <div class="creative-item">
+      <div class="creative-label dont">✗ Don't</div>
+      <div class="creative-val">${b.creative?.dont||''}</div>
+    </div>
+    <div class="creative-item creative-full">
+      <div class="creative-label neutral">Reference</div>
+      <div class="creative-val">${b.creative?.reference||''}</div>
+    </div>`;
+
+  document.getElementById('kpiList').innerHTML = (b.kpis||[]).map(k => `
+    <div class="kpi-item">
+      <div class="kpi-left">
+        <div class="kpi-metric">${k.metric}</div>
+        <div class="kpi-target">${k.target}</div>
+      </div>
+      <span class="kpi-tag ${k.type}">${k.type}</span>
+    </div>`).join('');
+
+  document.getElementById('summaryBox').innerHTML = `
+    <div class="hook-label" style="margin-bottom:10px">Brief Summary</div>
+    <p>${b.summary||''}</p>`;
+}
+
+function copyBrief() {
+  navigator.clipboard.writeText(rawBriefText).then(() => {
+    const btn = document.querySelector('.action-btn.primary');
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = 'Copy brief'; }, 2000);
+  });
+}
+
+function resetForm() {
+  document.getElementById('outputCard').classList.remove('visible');
+  document.getElementById('inputCard').style.display = 'block';
+  document.getElementById('generateBtn').disabled = false;
+  rawBriefText = '';
+  brandImageB64 = null;
+  brandImageType = null;
+  extractedPdfText = '';
+  ['product','market','audience','message','brandGuidelines','competitors','notes'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  ['objective','budget','restrictions'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('imageStatus').textContent = '';
+  document.getElementById('pdfStatus').textContent = '';
+  document.getElementById('imagePreview').style.display = 'none';
+  document.getElementById('previewImg').src = '';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
